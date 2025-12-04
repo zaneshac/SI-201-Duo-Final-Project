@@ -5,14 +5,8 @@
 
 import os
 import sqlite3
-import requests
-import time
-from typing import List, Optional, Tuple
-import math
+from typing import List, Tuple
 import spotipy
-
-# Visualization
-import matplotlib.pyplot as plt
 
 # Spotify
 import spotipy
