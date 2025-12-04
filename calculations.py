@@ -1,4 +1,4 @@
-# Collaborator Names: (Zanesha Chowdhury - 10440553), (Ariana Namei - ), 
+# Collaborator Names: (Zanesha Chowdhury - 10440553), (Ariana Namei - 55540082 ), 
 # Used ChatGPT for syntax, debugging, and pointing out errors. 
 # Utilized office hours and peer tutoring, too
 # We both worked on this together at the same time
