@@ -4,7 +4,7 @@ import sqlite3
 import requests
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from typing import List, Optional, Tuple
+from typing import List
 
 DB_PATH = "test.db"
 
