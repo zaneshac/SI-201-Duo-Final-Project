@@ -258,12 +258,12 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
             if fr.status_code != 200:
                 continue
             periods = fr.json().get("properties", {}).get("periods", [])
+            city_id = get_or_create_id(conn, "cities", "city_name", city)
             for p in periods:
                 if inserted >= max_new_per_run:
                     break
                 date = p.get("startTime", "").split("T")[0]
                 temp = p.get("temperature")
-                city_id = get_or_create_id(conn, "cities", "city_name", city)
                 forecast_text = p.get("shortForecast") or p.get("detailedForecast") or ""
                 forecast_id = get_or_create_id(conn, "forecasts", "forecast_text", forecast_text)
                 wind_speed = p.get("windSpeed", None)
@@ -275,7 +275,7 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
                               city_id, date, temperature_high, temperature_low, wind_speed, forecast_id
                         )
                         VALUES (?, ?, ?, ?, ?, ?)
-                    """, (city, date, temperature_high, temperature_low, wind_speed, forecast_id))
+                    """, (city_id, date, temperature_high, temperature_low, wind_speed, forecast_id))
                     if c.rowcount:
                         conn.commit()
                         inserted += 1
