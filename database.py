@@ -74,6 +74,41 @@ def create_tables(conn: sqlite3.Connection):
         UNIQUE(city, date)
     )
     """)
+
+    # remove string duplicates
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS pokemon_types (
+        type_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type_name TEXT UNIQUE
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS artists (
+        artist_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        artist_name TEXT UNIQUE
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS cities (
+        city_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        city_name TEXT UNIQUE
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS forecasts (
+        forecast_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        forecast_text TEXT UNIQUE
+    )
+    """)
+
+    c.execute("ALTER TABLE pokemon ADD COLUMN primary_type_id INTEGER")  
+    c.execute("ALTER TABLE tracks ADD COLUMN artist_id INTEGER")
+    c.execute("ALTER TABLE weather ADD COLUMN city_id INTEGER")
+    c.execute("ALTER TABLE weather ADD COLUMN forecast_id INTEGER")
+
     conn.commit()
 
 def already_exists(conn: sqlite3.Connection, table: str, where_clause: str, params=()) -> bool:
@@ -81,6 +116,21 @@ def already_exists(conn: sqlite3.Connection, table: str, where_clause: str, para
     q = f"SELECT 1 FROM {table} WHERE {where_clause} LIMIT 1"
     c.execute(q, params)
     return c.fetchone() is not None
+
+# string stuff 
+def get_or_create_id(conn, table, column, value):
+    c = conn.cursor()
+
+    # Try to find existing row
+    c.execute(f"SELECT rowid FROM {table} WHERE {column} = ?", (value,))
+    row = c.fetchone()
+    if row:
+        return row[0]
+
+    # Insert new row
+    c.execute(f"INSERT INTO {table} ({column}) VALUES (?)", (value,))
+    conn.commit()
+    return c.lastrowid
 
 # ----------------- PokeAPI functions ------------------------
 POKEAPI_BASE = "https://pokeapi.co/api/v2"
@@ -104,12 +154,13 @@ def fetch_pokemon_up_to_limit(conn: sqlite3.Connection, target_new: int = 25, ma
             height = data.get("height")
             weight = data.get("weight")
             types = data.get("types", [])
-            primary_type = types[0]["type"]["name"] if types else None
+            primary_type_name = types[0]["type"]["name"] if types else None
+            primary_type_id = get_or_create_id(conn, "pokemon_types", "type_name", primary_type_name)
 
             c.execute("""
-                INSERT OR IGNORE INTO pokemon (id, name, base_experience, height, weight, primary_type)
+                INSERT INTO pokemon (id, name, base_experience, height, weight, primary_type_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (pid, name, base_experience, height, weight, primary_type))
+            """, (pid, name, base_experience, height, weight, primary_type_id))
 
             stats_map = {s["stat"]["name"]: s["base_stat"] for s in data.get("stats", [])}
             hp = stats_map.get("hp")
@@ -149,18 +200,20 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
                 if inserted >= max_new:
                     break
                 title = track["name"]
-                artist_names = ", ".join([a["name"] for a in track["artists"]])
+                artist_name = track["artists"][0]["name"]  # main artist only
+                artist_id = get_or_create_id(conn, "artists", "artist_name", artist_name)
+
                 popularity = track.get("popularity") or 0
 
                 try:
                     c.execute("""
-                        INSERT OR IGNORE INTO tracks (title, artist, popularity)
+                        INSERT OR IGNORE INTO tracks (title, artist_id, popularity)
                         VALUES (?, ?, ?)
-                    """, (title, artist_names, popularity))
+                    """, (title, artist_id, popularity))
                     if c.rowcount:
                         conn.commit()
                         inserted += 1
-                        print(f"[Spotify] Inserted track: {title} - {artist_names} ({inserted}/{max_new})")
+                        print(f"[Spotify] Inserted track: {title} - {artist_name} ({inserted}/{max_new})")
                 except Exception as e:
                     print("DB insert error (tracks):", e)
         except Exception as e:
@@ -210,15 +263,19 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
                     break
                 date = p.get("startTime", "").split("T")[0]
                 temp = p.get("temperature")
-                short_forecast = p.get("shortForecast")
+                city_id = get_or_create_id(conn, "cities", "city_name", city)
+                forecast_text = p.get("shortForecast") or p.get("detailedForecast") or ""
+                forecast_id = get_or_create_id(conn, "forecasts", "forecast_text", forecast_text)
                 wind_speed = p.get("windSpeed", None)
                 temperature_high = temp
                 temperature_low = temp
                 try:
                     c.execute("""
-                        INSERT OR IGNORE INTO weather (city, date, temperature_high, temperature_low, wind_speed, short_forecast)
+                        INSERT OR IGNORE INTO weather (
+                              city_id, date, temperature_high, temperature_low, wind_speed, forecast_id
+                        )
                         VALUES (?, ?, ?, ?, ?, ?)
-                    """, (city, date, temperature_high, temperature_low, wind_speed, short_forecast))
+                    """, (city, date, temperature_high, temperature_low, wind_speed, forecast_id))
                     if c.rowcount:
                         conn.commit()
                         inserted += 1
