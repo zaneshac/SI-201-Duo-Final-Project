@@ -36,9 +36,19 @@ def create_tables(conn: sqlite3.Connection):
         base_experience INTEGER,
         height INTEGER,
         weight INTEGER,
-        primary_type TEXT
+        primary_type_id INTEGER,
+        FOREIGN KEY(primary_type_id) REFERENCES pokemon_types(type_id)
     )
     """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS pokemon_types (
+        type_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type_name TEXT UNIQUE
+    )
+    """)
+
+
     c.execute("""
     CREATE TABLE IF NOT EXISTS pokemon_stats (
         pokemon_id INTEGER PRIMARY KEY,
@@ -57,6 +67,7 @@ def create_tables(conn: sqlite3.Connection):
         title TEXT NOT NULL,
         artist TEXT,
         popularity INTEGER,
+        artist_id INTEGER,
         UNIQUE(title, artist)
     )
     """)
@@ -71,6 +82,8 @@ def create_tables(conn: sqlite3.Connection):
         temperature_low REAL,
         wind_speed REAL,
         short_forecast TEXT,
+        city_id INTEGER,
+        forecast_id INTEGER,
         UNIQUE(city, date)
     )
     """)
@@ -103,11 +116,6 @@ def create_tables(conn: sqlite3.Connection):
         forecast_text TEXT UNIQUE
     )
     """)
-
-    c.execute("ALTER TABLE pokemon ADD COLUMN primary_type_id INTEGER")  
-    c.execute("ALTER TABLE tracks ADD COLUMN artist_id INTEGER")
-    c.execute("ALTER TABLE weather ADD COLUMN city_id INTEGER")
-    c.execute("ALTER TABLE weather ADD COLUMN forecast_id INTEGER")
 
     conn.commit()
 
