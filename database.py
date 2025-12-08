@@ -66,8 +66,7 @@ def create_tables(conn: sqlite3.Connection):
         track_id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         popularity INTEGER,
-        artist_id INTEGER,
-        UNIQUE(titleg)
+        artist_id INTEGER
     )
     """)
 
@@ -75,15 +74,13 @@ def create_tables(conn: sqlite3.Connection):
     c.execute("""
     CREATE TABLE IF NOT EXISTS weather (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        city TEXT,
-        date TEXT,
+        city_id INTEGER,
+        date_id INTEGER,
         temperature_high REAL,
         temperature_low REAL,
-        wind_speed REAL,
-        short_forecast TEXT,
-        city_id INTEGER,
+        wind_speed_id INTEGER,
         forecast_id INTEGER,
-        UNIQUE(city, date)
+        UNIQUE(city_id, date_id)
     )
     """)
 
@@ -113,6 +110,22 @@ def create_tables(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS forecasts (
         forecast_id INTEGER PRIMARY KEY AUTOINCREMENT,
         forecast_text TEXT UNIQUE
+    )
+    """)
+
+    #lets try this
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS weather_date (
+        date_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date_text TEXT UNIQUE
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS wind_speeds (
+        wind_speed_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        wind_speed_text TEXT UNIQUE
     )
     """)
 
@@ -276,13 +289,20 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
                 wind_speed = p.get("windSpeed", None)
                 temperature_high = temp
                 temperature_low = temp
+
+                date_value = p.get("startTime", "").split("T")[0]
+                wind_speed_value = p.get("windSpeed", "")
+                date_id = get_or_create_id(conn, "weather_date", "date_text", date_value)
+                wind_speed_id = get_or_create_id(conn, "wind_speeds", "wind_speed_text", wind_speed_value)
+
                 try:
                     c.execute("""
                         INSERT OR IGNORE INTO weather (
-                              city_id, date, temperature_high, temperature_low, wind_speed, forecast_id
+                            city_id, date_id, temperature_high, temperature_low, 
+                            wind_speed_id, forecast_id
                         )
                         VALUES (?, ?, ?, ?, ?, ?)
-                    """, (city_id, date, temperature_high, temperature_low, wind_speed, forecast_id))
+                    """, (city_id, date_id, temperature_high, temperature_low, wind_speed_id, forecast_id))
                     if c.rowcount:
                         conn.commit()
                         inserted += 1
