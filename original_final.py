@@ -69,7 +69,6 @@ def create_tables(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS tracks (
         track_id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        artist TEXT,
         popularity INTEGER,
         UNIQUE(title, artist)
     )

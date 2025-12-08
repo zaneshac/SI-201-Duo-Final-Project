@@ -44,7 +44,6 @@ def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[
     q = """
     SELECT artist, AVG(popularity) as avg_pop, COUNT(*) as cnt
     FROM tracks
-    WHERE artist IS NOT NULL
     GROUP BY artist
     ORDER BY avg_pop DESC
     """

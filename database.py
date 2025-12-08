@@ -6,7 +6,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import List
 
-DB_PATH = "test.db"
+DB_PATH = "new.db"
 
 # API keys (set as environment variables)
 OMDB_API_KEY = os.getenv("OMDB_API_KEY", "664d8386")
@@ -65,10 +65,9 @@ def create_tables(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS tracks (
         track_id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        artist TEXT,
         popularity INTEGER,
         artist_id INTEGER,
-        UNIQUE(title, artist)
+        UNIQUE(titleg)
     )
     """)
 

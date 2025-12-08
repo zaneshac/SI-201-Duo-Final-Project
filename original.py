@@ -69,7 +69,6 @@ def create_tables(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS tracks (
         track_id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        artist TEXT,
         popularity INTEGER,
         UNIQUE(title, artist)
     )
@@ -176,18 +175,22 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
                 if inserted >= max_new:
                     break
                 title = track["name"]
-                artist_names = ", ".join([a["name"] for a in track["artists"]])
+                #artist_names = ", ".join([a["name"] for a in track["artists"]])
                 popularity = track.get("popularity") or 0
 
                 try:
+                    # c.execute("""
+                    #     INSERT OR IGNORE INTO tracks (title, artist, popularity)
+                    #     VALUES (?, ?, ?)
+                    # """, (title, artist_names, popularity))
                     c.execute("""
-                        INSERT OR IGNORE INTO tracks (title, artist, popularity)
+                        INSERT OR IGNORE INTO tracks (title, popularity)
                         VALUES (?, ?, ?)
-                    """, (title, artist_names, popularity))
+                    """, (title, popularity))
                     if c.rowcount:
                         conn.commit()
                         inserted += 1
-                        print(f"[Spotify] Inserted track: {title} - {artist_names} ({inserted}/{max_new})")
+                        print(f"[Spotify] Inserted track: {title} -  ({inserted}/{max_new})")
                 except Exception as e:
                     print("DB insert error (tracks):", e)
         except Exception as e:
