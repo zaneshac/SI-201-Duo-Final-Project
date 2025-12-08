@@ -2,6 +2,7 @@ import os
 import time
 import sqlite3
 import requests
+import random
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import List
@@ -213,15 +214,26 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
     for artist_name in artist_list:
         if inserted >= max_new:
             break
+        
+        # NEW → random offset so results change every run
+        offset = random.randint(0, 100)
+
         try:
-            results = spotify_client.search(q=f"artist:{artist_name}", type="track", limit=10)
+            results = spotify_client.search(
+                q=f"artist:{artist_name}",
+                type="track",
+                limit=10,
+                offset=offset
+            )
+
             tracks = results.get("tracks", {}).get("items", [])
             for track in tracks:
                 if inserted >= max_new:
                     break
+
                 title = track["name"]
-                artist_name = track["artists"][0]["name"]  # main artist only
-                artist_id = get_or_create_id(conn, "artists", "artist_name", artist_name)
+                main_artist = track["artists"][0]["name"]
+                artist_id = get_or_create_id(conn, "artists", "artist_name", main_artist)
 
                 popularity = track.get("popularity") or 0
 
@@ -230,15 +242,20 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
                         INSERT OR IGNORE INTO tracks (title, artist_id, popularity)
                         VALUES (?, ?, ?)
                     """, (title, artist_id, popularity))
-                    if c.rowcount:
+
+                    if c.rowcount:  # only count if it's truly new
                         conn.commit()
                         inserted += 1
-                        print(f"[Spotify] Inserted track: {title} - {artist_name} ({inserted}/{max_new})")
+                        print(f"[Spotify] Inserted track: {title} - {main_artist} ({inserted}/{max_new})")
+
                 except Exception as e:
                     print("DB insert error (tracks):", e)
+
         except Exception as e:
             print("Spotify API error:", e)
+
         time.sleep(0.2)
+
     print(f"[Spotify] Finished run: inserted {inserted} new tracks.")
 
 # ---------------- Weather.gov functions -------------------
