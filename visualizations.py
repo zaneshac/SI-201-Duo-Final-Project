@@ -58,6 +58,7 @@ def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
     lows = [r["avg_low"] for r in rows]
 
     x = range(len(cities))
+    print(x)
     plt.figure(figsize=(10, 6))
     plt.plot(x, highs, marker="o", label="Avg High")
     plt.plot(x, lows, marker="o", label="Avg Low")
