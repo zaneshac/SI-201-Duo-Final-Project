@@ -80,8 +80,7 @@ def create_tables(conn: sqlite3.Connection):
         temperature_high REAL,
         temperature_low REAL,
         wind_speed_id INTEGER,
-        forecast_id INTEGER,
-        UNIQUE(city_id, date_id)
+        forecast_id INTEGER
     )
     """)
 
