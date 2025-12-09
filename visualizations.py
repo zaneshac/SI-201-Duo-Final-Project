@@ -69,6 +69,23 @@ def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
     plt.show()
    
 def visualize_pokemon_weight(conn:sqlite3.Connection):
+    from calculations import calculate_weight_per_pokemon_type
+
+    data = calculate_weight_per_pokemon_type(conn)
+    if not data:
+        return
+
+    types = [d[0] if d[0] is not None else "Unknown" for d in data]
+    avg_weights = [d[1] for d in data]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(types, avg_weights, color="lightgreen", edgecolor="black")
+    plt.title("Average Pokémon Weight by Primary Type")
+    plt.xlabel("Pokémon Type")
+    plt.ylabel("Average Weight")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
 
 # ----------------- Main example run ------------------------
 def example_run():
@@ -80,6 +97,7 @@ def example_run():
     visualize_avg_base_exp_by_type(conn)
     visualize_avg_popularity_per_artist(conn)
     visualize_temp_high_low_by_city(conn)
+    visualize_pokemon_weight(conn)
 
 if __name__ == "__main__":
     example_run()
