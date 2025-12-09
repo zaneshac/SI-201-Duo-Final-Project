@@ -30,33 +30,46 @@ else:
 def calculate_avg_base_exp_by_type(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
     q = """
-    SELECT primary_type, AVG(base_experience) AS avg_be, COUNT(*) as cnt
+    SELECT primary_type_id, AVG(base_experience) AS avg_be, COUNT(*) as cnt
     FROM pokemon
-    WHERE primary_type IS NOT NULL
-    GROUP BY primary_type
+    WHERE primary_type_id IS NOT NULL
+    GROUP BY primary_type_id
     ORDER BY avg_be DESC
     """
     c.execute(q)
-    return [(row["primary_type"], row["avg_be"], row["cnt"]) for row in c.fetchall()]
+    return [(row["primary_type_id"], row["avg_be"], row["cnt"]) for row in c.fetchall()]
+
+def joinpokemon(conn: sqlite3.Connection):
+    c=conn.cursor()
+    c.execute(""" 
+              SELECT t.*,p.*
+              FROM pokemon p
+              left join pokemon_types t
+              on p.primary_type_id = t.type_id
+              ;
+                  """) 
+    print("joined the pokemon tables!")
+    results = c.fetchall()
+    return results
 
 def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
     q = """
-    SELECT artist, AVG(popularity) as avg_pop, COUNT(*) as cnt
+    SELECT artist_id, AVG(popularity) as avg_pop, COUNT(*) as cnt
     FROM tracks
-    GROUP BY artist
+    GROUP BY artist_id
     ORDER BY avg_pop DESC
     """
     c.execute(q)
-    return [(row["artist"], row["avg_pop"], row["cnt"]) for row in c.fetchall()]
+    return [(row["artist_id"], row["avg_pop"], row["cnt"]) for row in c.fetchall()]
 
 def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
     q = """
-    SELECT city, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low, COUNT(*) as cnt
+    SELECT city_id, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low, COUNT(*) as cnt
     FROM weather
-    WHERE city IS NOT NULL
-    GROUP BY city
+    WHERE city_id IS NOT NULL
+    GROUP BY city_id
     """
     c.execute(q)
     results = []
@@ -64,7 +77,7 @@ def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[s
         if row["avg_high"] is None or row["avg_low"] is None:
             continue
         variability = row["avg_high"] - row["avg_low"]
-        results.append((row["city"], variability, row["cnt"]))
+        results.append((row["city_id"], variability, row["cnt"]))
     return results
 
 
@@ -74,13 +87,14 @@ def example_run():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
+    print(joinpokemon(conn))
     # Calculations
     print("\n--- Pokémon ---")
     print("Avg base exp by type:", calculate_avg_base_exp_by_type(conn))
     print("\n--- Spotify ---")
-    print("Avg track popularity per artist:", calculate_avg_popularity_per_artist(conn))
+    print("Avg track popularity per artist_id:", calculate_avg_popularity_per_artist(conn))
     print("\n--- Weather ---")
-    print("Temperature variability by city:", calculate_temp_variability_by_city(conn))
+    print("Temperature variability by city_id:", calculate_temp_variability_by_city(conn))
 
     conn.close()
 

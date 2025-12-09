@@ -45,15 +45,15 @@ def visualize_avg_popularity_per_artist(conn: sqlite3.Connection, top_n: int = 1
 def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
     c = conn.cursor()
     q = """
-    SELECT city, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low
+    SELECT city_id, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low
     FROM weather
-    GROUP BY city
+    GROUP BY city_id
     """
     c.execute(q)
     rows = c.fetchall()
     if not rows:
         return
-    cities = [r["city"] for r in rows]
+    cities = [r["city_id"] for r in rows]
     highs = [r["avg_high"] for r in rows]
     lows = [r["avg_low"] for r in rows]
 
