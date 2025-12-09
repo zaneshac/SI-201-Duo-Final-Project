@@ -39,18 +39,18 @@ def calculate_avg_base_exp_by_type(conn: sqlite3.Connection) -> List[Tuple[str, 
     c.execute(q)
     return [(row["primary_type_id"], row["avg_be"], row["cnt"]) for row in c.fetchall()]
 
-def joinpokemon(conn: sqlite3.Connection):
+def calculate_weight_per_pokemon_type(conn: sqlite3.Connection):
     c=conn.cursor()
     c.execute(""" 
-              SELECT t.*,p.*
-              FROM pokemon p
-              left join pokemon_types t
-              on p.primary_type_id = t.type_id
-              ;
+            SELECT t.type_name, AVG(p.weight) as avg_weight
+            FROM pokemon p 
+            left join pokemon_types t 
+            on p.primary_type_id = t.type_id
+            GROUP BY t.type_name
+            ;
                   """) 
     print("joined the pokemon tables!")
-    results = c.fetchall()
-    return results
+    return [(row["type_name"], row["avg_weight"]) for row in c.fetchall()]
 
 def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
@@ -87,7 +87,7 @@ def example_run():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    print(joinpokemon(conn))
+    print(calculate_weight_per_pokemon_type(conn))
     # Calculations
     print("\n--- Pokémon ---")
     print("Avg base exp by type:", calculate_avg_base_exp_by_type(conn))

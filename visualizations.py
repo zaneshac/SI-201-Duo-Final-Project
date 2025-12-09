@@ -67,27 +67,8 @@ def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
     plt.legend()
     plt.tight_layout()
     plt.show()
-
-def visualize_runtime_vs_rating(conn: sqlite3.Connection):
-    c = conn.cursor()
-    q = """
-    SELECT runtime, imdb_rating FROM movies
-    WHERE runtime IS NOT NULL AND imdb_rating IS NOT NULL
-    """
-    c.execute(q)
-    rows = c.fetchall()
-    if not rows:
-        return
-    runtimes = [r["runtime"] for r in rows]
-    ratings = [r["imdb_rating"] for r in rows]
-
-    plt.figure(figsize=(8, 6))
-    plt.scatter(runtimes, ratings)
-    plt.xlabel("Runtime (minutes)")
-    plt.ylabel("IMDb Rating")
-    plt.title("Movie Runtime vs. IMDb Rating")
-    plt.tight_layout()
-    plt.show()
+   
+def visualize_pokemon_weight(conn:sqlite3.Connection):
 
 # ----------------- Main example run ------------------------
 def example_run():
