@@ -69,6 +69,35 @@ def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
     plt.legend()
     plt.tight_layout()
     plt.show()
+
+# new scatter plot visual
+def visualize_temp_vs_wind_speed(conn: sqlite3.Connection):
+    from calculations import calculate_temp_vs_wind
+    data = calculate_temp_vs_wind(conn)
+
+    if not data:
+        print("No temp/wind data found.")
+        return
+
+    city_groups = {}
+    for city, temp, wind in data:
+        city_groups.setdefault(city, {"temp": [], "wind": []})
+        city_groups[city]["temp"].append(temp)
+        city_groups[city]["wind"].append(wind)
+
+    plt.figure(figsize=(10, 6))
+
+    # Make scatter for each city
+    for city, vals in city_groups.items():
+        plt.scatter(vals["temp"], vals["wind"], label=city)
+
+    plt.xlabel("Temperature (°F)")
+    plt.ylabel("Wind Speed (mph)")
+    plt.title("Wind Speed vs Temperature for All Cities")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
    
 def visualize_pokemon_weight(conn:sqlite3.Connection):
     from calculations import calculate_weight_per_pokemon_type
@@ -99,6 +128,7 @@ def example_run():
     visualize_avg_base_exp_by_type(conn)
     visualize_avg_popularity_per_artist(conn)
     visualize_temp_high_low_by_city(conn)
+    visualize_temp_vs_wind_speed(conn)
     visualize_pokemon_weight(conn)
 
 if __name__ == "__main__":

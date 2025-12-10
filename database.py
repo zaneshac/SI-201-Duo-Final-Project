@@ -7,7 +7,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import List
 
-DB_PATH = "new.db"
+DB_PATH = "newv2.db"
 
 # API keys (set as environment variables)
 OMDB_API_KEY = os.getenv("OMDB_API_KEY", "664d8386")
@@ -266,70 +266,81 @@ CITY_COORDS = {
     "Los Angeles, CA": (34.0522, -118.2437),
 }
 
-def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_new_per_run: int = 25):
+def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_new=25):
     base = "https://api.weather.gov"
     headers = {"User-Agent": "SI201-Project (student@example.edu)"}
-    inserted = 0
     c = conn.cursor()
 
+    combined = []  # (city, period) tuples
+
+    # 1. Collect periods from all cities first
     for city in cities:
-        if inserted >= max_new_per_run:
-            break
         if city not in CITY_COORDS:
             continue
         lat, lon = CITY_COORDS[city]
+
         try:
             points_url = f"{base}/points/{lat},{lon}"
             r = requests.get(points_url, headers=headers, timeout=10)
             if r.status_code != 200:
                 continue
-            points = r.json()
-            grid = points.get("properties", {}).get("gridId")
-            grid_x = points.get("properties", {}).get("gridX")
-            grid_y = points.get("properties", {}).get("gridY")
-            if not (grid and grid_x is not None and grid_y is not None):
-                continue
-            forecast_url = f"{base}/gridpoints/{grid}/{grid_x},{grid_y}/forecast"
+
+            props = r.json()["properties"]
+            grid = props["gridId"]
+            x = props["gridX"]
+            y = props["gridY"]
+
+            forecast_url = f"{base}/gridpoints/{grid}/{x},{y}/forecast"
             fr = requests.get(forecast_url, headers=headers, timeout=10)
             if fr.status_code != 200:
                 continue
-            periods = fr.json().get("properties", {}).get("periods", [])
-            print(periods)
-            city_id = get_or_create_id(conn, "cities", "city_name", city)
+
+            periods = fr.json()["properties"]["periods"]
             for p in periods:
-                if inserted >= max_new_per_run:
-                    break
-                date = p.get("startTime", "").split("T")[0]
-                temp = p.get("temperature")
-                forecast_text = p.get("shortForecast") or p.get("detailedForecast") or ""
-                forecast_id = get_or_create_id(conn, "forecasts", "forecast_text", forecast_text)
-                wind_speed = p.get("windSpeed", None) # make a line graph with this + temperature
-                temperature_high = temp # temp is one variable 
-                temperature_low = temp
+                combined.append((city, p))
 
-                date_value = p.get("startTime", "").split("T")[0]
-                wind_speed_value = p.get("windSpeed", "")
-                date_id = get_or_create_id(conn, "weather_date", "date_text", date_value)
-                wind_speed_id = get_or_create_id(conn, "wind_speeds", "wind_speed_text", wind_speed_value)
-
-                try:
-                    c.execute("""
-                        INSERT OR IGNORE INTO weather (
-                            city_id, date_id, temperature_high, temperature_low, 
-                            wind_speed_id, forecast_id
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    """, (city_id, date_id, temperature_high, temperature_low, wind_speed_id, forecast_id))
-                    if c.rowcount:
-                        conn.commit()
-                        inserted += 1
-                        print(f"[Weather] Inserted {city} {date} ({inserted}/{max_new_per_run})")
-                except Exception as e:
-                    print("DB error (weather)", e)
-            time.sleep(0.25)
         except Exception as e:
-            print("Weather API error:", e)
-    print(f"[Weather] Finished run: inserted {inserted} new rows.")
+            print("Error fetching:", city, e)
+
+        time.sleep(0.25)
+
+    # 2. Shuffle so cities mix
+    random.shuffle(combined)
+
+    # 3. Limit to the first 25 total rows
+    selected_periods = combined[:max_new]
+
+    # 4. Insert selected rows
+    inserted = 0
+    for city, p in selected_periods:
+        date_value = p["startTime"].split("T")[0]
+        temp = p.get("temperature")
+        wind_speed_value = p.get("windSpeed", "")
+        forecast_text = p.get("shortForecast") or ""
+
+        city_id = get_or_create_id(conn, "cities", "city_name", city)
+        date_id = get_or_create_id(conn, "weather_date", "date_text", date_value)
+        wind_speed_id = get_or_create_id(conn, "wind_speeds", "wind_speed_text", wind_speed_value)
+        forecast_id = get_or_create_id(conn, "forecasts", "forecast_text", forecast_text)
+
+        c.execute("""
+            INSERT OR IGNORE INTO weather (
+                city_id, date_id, temperature_high, temperature_low,
+                wind_speed_id, forecast_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (city_id, date_id, temp, temp, wind_speed_id, forecast_id))
+
+        if c.rowcount:
+            conn.commit()
+            inserted += 1
+            print(f"[Weather] Inserted {city}: {date_value} ({inserted}/{max_new})")
+
+        if inserted >= max_new:
+            break
+
+    print(f"[Weather] Finished run: inserted {inserted} new rows total.")
+
 
 
 def main():
@@ -348,7 +359,7 @@ def main():
 
     # Weather
     cities = list(CITY_COORDS.keys())
-    fetch_weather_for_cities(conn, cities, max_new_per_run=25)
+    fetch_weather_for_cities(conn, cities, max_new=25)
 
     conn.close()
 
