@@ -30,14 +30,16 @@ else:
 def calculate_avg_base_exp_by_type(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
     q = """
-    SELECT primary_type_id, AVG(base_experience) AS avg_be, COUNT(*) as cnt
-    FROM pokemon
+    SELECT t.type_name, AVG(p.base_experience) AS avg_be, COUNT(*) as cnt
+    FROM pokemon p
+    left join pokemon_types t
+    on p.primary_type_id = t.type_id
     WHERE primary_type_id IS NOT NULL
-    GROUP BY primary_type_id
+    GROUP BY t.type_name
     ORDER BY avg_be DESC
     """
     c.execute(q)
-    return [(row["primary_type_id"], row["avg_be"], row["cnt"]) for row in c.fetchall()]
+    return [(row["type_name"], row["avg_be"], row["cnt"]) for row in c.fetchall()]
 
 def calculate_weight_per_pokemon_type(conn: sqlite3.Connection):
     c=conn.cursor()
@@ -55,13 +57,15 @@ def calculate_weight_per_pokemon_type(conn: sqlite3.Connection):
 def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
     q = """
-    SELECT artist_id, AVG(popularity) as avg_pop, COUNT(*) as cnt
-    FROM tracks
-    GROUP BY artist_id
+    SELECT a.artist_name, AVG(t.popularity) as avg_pop, COUNT(*) as cnt
+    FROM tracks t
+    left join artists a 
+    on t.artist_id = a.artist_id
+    GROUP BY artist_name
     ORDER BY avg_pop DESC
     """
     c.execute(q)
-    return [(row["artist_id"], row["avg_pop"], row["cnt"]) for row in c.fetchall()]
+    return [(row["artist_name"], row["avg_pop"], row["cnt"]) for row in c.fetchall()]
 
 def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
