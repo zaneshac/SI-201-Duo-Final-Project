@@ -81,6 +81,34 @@ def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[s
     return results
 
 
+# try this for a new visual
+
+def calculate_temp_vs_wind(conn: sqlite3.Connection):
+    c = conn.cursor()
+    q = """
+    SELECT c.city_name, w.temperature_high, ws.wind_speed_text
+    FROM weather w
+    JOIN cities c ON w.city_id = c.city_id
+    JOIN wind_speeds ws ON w.wind_speed_id = ws.wind_speed_id
+    WHERE w.temperature_high IS NOT NULL
+      AND ws.wind_speed_text IS NOT NULL
+    """
+    c.execute(q)
+
+    results = []
+    for row in c.fetchall():
+        # windSpeed_text looks like "5 mph", so extract the number
+        wind_raw = row["wind_speed_text"]
+        try:
+            wind_value = int(wind_raw.split()[0])
+        except:
+            continue
+
+        results.append((row["city_name"], row["temperature_high"], wind_value))
+
+    return results
+
+
 
 def example_run():
     
