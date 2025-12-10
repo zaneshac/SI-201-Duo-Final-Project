@@ -63,6 +63,7 @@ def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
     plt.plot(x, highs, marker="o", label="Avg High")
     plt.plot(x, lows, marker="o", label="Avg Low")
     plt.xticks(x, cities, rotation=45)
+    plt.xlabel("Cities")
     plt.ylabel("Temperature")
     plt.title("Average High and Low Temperatures by City")
     plt.legend()
