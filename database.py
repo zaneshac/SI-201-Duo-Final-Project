@@ -77,8 +77,7 @@ def create_tables(conn: sqlite3.Connection):
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         city_id INTEGER,
         date_id INTEGER,
-        temperature_high REAL,
-        temperature_low REAL,
+        temperature REAL,
         wind_speed_id INTEGER,
         forecast_id INTEGER
     )
@@ -325,11 +324,11 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
 
         c.execute("""
             INSERT OR IGNORE INTO weather (
-                city_id, date_id, temperature_high, temperature_low,
+                city_id, date_id, temperature,
                 wind_speed_id, forecast_id
             )
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (city_id, date_id, temp, temp, wind_speed_id, forecast_id))
+            VALUES (?, ?, ?, ?, ?)
+        """, (city_id, date_id, temp, wind_speed_id, forecast_id))
 
         if c.rowcount:
             conn.commit()

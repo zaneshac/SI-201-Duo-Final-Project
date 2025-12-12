@@ -69,34 +69,14 @@ def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[
     c.execute(q)
     return [(row["artist_name"], row["avg_pop"], row["cnt"]) for row in c.fetchall()]
 
-def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
-    c = conn.cursor()
-    q = """
-    SELECT city_id, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low, COUNT(*) as cnt
-    FROM weather
-    WHERE city_id IS NOT NULL
-    GROUP BY city_id
-    """
-    c.execute(q)
-    results = []
-    for row in c.fetchall():
-        if row["avg_high"] is None or row["avg_low"] is None:
-            continue
-        variability = row["avg_high"] - row["avg_low"]
-        results.append((row["city_id"], variability, row["cnt"]))
-    return results
-
-
-# try this for a new visual
-
 def calculate_temp_vs_wind(conn: sqlite3.Connection):
     c = conn.cursor()
     q = """
-    SELECT c.city_name, w.temperature_high, ws.wind_speed_text
+    SELECT c.city_name, w.temperature, ws.wind_speed_text
     FROM weather w
     JOIN cities c ON w.city_id = c.city_id
     JOIN wind_speeds ws ON w.wind_speed_id = ws.wind_speed_id
-    WHERE w.temperature_high IS NOT NULL
+    WHERE w.temperature IS NOT NULL
       AND ws.wind_speed_text IS NOT NULL
     """
     c.execute(q)
@@ -110,7 +90,7 @@ def calculate_temp_vs_wind(conn: sqlite3.Connection):
         except:
             continue
 
-        results.append((row["city_name"], row["temperature_high"], wind_value))
+        results.append((row["city_name"], row["temperature"], wind_value))
 
     return results
 def write_csv(filename: str, headers: List[str], rows: List[Tuple]):
