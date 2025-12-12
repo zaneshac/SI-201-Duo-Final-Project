@@ -14,11 +14,16 @@ def visualize_avg_base_exp_by_type(conn: sqlite3.Connection, top_n: int = 12):
     data = calculate_avg_base_exp_by_type(conn)
     if not data:
         return
+
     types = [d[0] for d in data][:top_n]
     avg_be = [d[1] for d in data][:top_n]
 
+    # Generate 12 distinct colors automatically
+    colors = plt.cm.tab20(range(len(types)))  # tab20 has many distinct colors
+
     plt.figure(figsize=(10, 6))
-    plt.bar(types, avg_be, color="purple")
+    plt.bar(types, avg_be, color=colors)
+
     plt.title("Average Base Experience by Pokémon Primary Type")
     plt.xlabel("Type")
     plt.ylabel("Average Base Experience")
@@ -38,6 +43,7 @@ def visualize_avg_popularity_per_artist(conn: sqlite3.Connection, top_n: int = 1
     plt.barh(y_pos, avg_pop, color = "red")
     plt.yticks(y_pos, artists)
     plt.xlabel("Average Track Popularity")
+    plt.ylabel("Artist Names")
     plt.title("Average Spotify Track Popularity per Artist")
     plt.tight_layout()
     plt.show()
@@ -99,7 +105,6 @@ def example_run():
     # Visualizations
     visualize_avg_base_exp_by_type(conn)
     visualize_avg_popularity_per_artist(conn)
-    #visualize_temp_high_low_by_city(conn)
     visualize_temp_vs_wind_speed(conn)
     visualize_pokemon_weight(conn)
 
