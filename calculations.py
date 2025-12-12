@@ -91,11 +91,11 @@ def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[
 def calculate_temp_vs_wind(conn: sqlite3.Connection):
     c = conn.cursor()
     q = """
-    SELECT c.city_name, w.temperature_high, ws.wind_speed_text
+    SELECT c.city_name, w.temperature, ws.wind_speed_text
     FROM weather w
     JOIN cities c ON w.city_id = c.city_id
     JOIN wind_speeds ws ON w.wind_speed_id = ws.wind_speed_id
-    WHERE w.temperature_high IS NOT NULL
+    WHERE w.temperature IS NOT NULL
       AND ws.wind_speed_text IS NOT NULL
     """
     c.execute(q)
@@ -109,7 +109,7 @@ def calculate_temp_vs_wind(conn: sqlite3.Connection):
         except:
             continue
 
-        results.append((row["city_name"], row["temperature_high"], wind_value))
+        results.append((row["city_name"], row["temperature"], wind_value))
 
     return results
 
@@ -123,11 +123,11 @@ def example_run():
     print(calculate_weight_per_pokemon_type(conn))
     # Calculations
     print("\n--- Pokémon ---")
-    print("Avg base exp by type:", calculate_avg_base_exp_by_type(conn))
+    print("Average Base Experience by Type:", calculate_avg_base_exp_by_type(conn))
     print("\n--- Spotify ---")
-    print("Avg track popularity per artist_id:", calculate_avg_popularity_per_artist(conn))
+    print("Average Track Popularity per artist_id:", calculate_avg_popularity_per_artist(conn))
     print("\n--- Weather ---")
-    print("Temperature variability by city_id:", calculate_temp_variability_by_city(conn))
+    print("Temperature vs Wind Speed:", calculate_temp_vs_wind(conn))
 
     conn.close()
 
