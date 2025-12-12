@@ -1,51 +1,26 @@
 city_name,temperature,wind_speed_mph
-"New York, NY",33.0,12
-"Chicago, IL",30.0,10
-"Chicago, IL",26.0,5
-"New York, NY",24.0,18
-"Ann Arbor, MI",20.0,8
-"Detroit, MI",16.0,6
-"Detroit, MI",28.0,13
-"New York, NY",35.0,17
-"Chicago, IL",21.0,5
-"Los Angeles, CA",55.0,5
-"Ann Arbor, MI",27.0,12
-"Detroit, MI",18.0,10
-"New York, NY",33.0,13
-"Detroit, MI",28.0,3
-"Los Angeles, CA",54.0,0
-"Chicago, IL",35.0,10
-"Los Angeles, CA",83.0,5
-"Los Angeles, CA",73.0,0
-"Ann Arbor, MI",20.0,5
-"Chicago, IL",31.0,10
-"Detroit, MI",24.0,14
-"Los Angeles, CA",73.0,0
-"Detroit, MI",10.0,10
-"Detroit, MI",17.0,5
-"Los Angeles, CA",52.0,0
-"Ann Arbor, MI",20.0,6
-"Detroit, MI",33.0,12
-"New York, NY",34.0,10
 "Chicago, IL",33.0,15
+"Detroit, MI",40.0,13
+"Chicago, IL",14.0,15
+"New York, NY",38.0,10
 "Los Angeles, CA",53.0,0
-"New York, NY",41.0,8
-"Chicago, IL",36.0,10
-"New York, NY",29.0,6
-"New York, NY",35.0,10
-"Detroit, MI",12.0,6
-"Ann Arbor, MI",3.0,9
-"Chicago, IL",10.0,10
-"Los Angeles, CA",79.0,5
-"Chicago, IL",20.0,5
-"Los Angeles, CA",55.0,5
+"Chicago, IL",13.0,10
+"Ann Arbor, MI",10.0,6
 "Detroit, MI",6.0,10
-"Chicago, IL",5.0,5
-"New York, NY",30.0,9
-"Detroit, MI",32.0,6
-"Los Angeles, CA",78.0,0
-"Los Angeles, CA",77.0,0
-"Los Angeles, CA",75.0,0
-"New York, NY",28.0,15
-"New York, NY",40.0,5
+"Ann Arbor, MI",23.0,9
+"Los Angeles, CA",79.0,5
+"Ann Arbor, MI",39.0,13
+"Ann Arbor, MI",3.0,9
+"New York, NY",35.0,10
+"New York, NY",31.0,14
 "New York, NY",27.0,14
+"Chicago, IL",20.0,5
+"Los Angeles, CA",79.0,0
+"Detroit, MI",21.0,10
+"Ann Arbor, MI",14.0,3
+"Chicago, IL",35.0,15
+"Los Angeles, CA",75.0,0
+"Ann Arbor, MI",31.0,5
+"Ann Arbor, MI",30.0,12
+"New York, NY",30.0,10
+"New York, NY",49.0,9

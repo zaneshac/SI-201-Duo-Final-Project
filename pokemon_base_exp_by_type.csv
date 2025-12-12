@@ -1,10 +1,8 @@
 type_name,avg_base_experience,count
-fairy,165.0,2
-electric,165.0,2
 water,148.0,3
-grass,144.16666666666666,6
-fire,136.2,5
-poison,124.3,10
-normal,120.22222222222223,9
-bug,99.6,10
-ground,90.33333333333333,3
+fire,148.0,3
+grass,147.33333333333334,3
+normal,113.0,7
+electric,112.0,1
+poison,107.5,2
+bug,96.33333333333333,6

@@ -10,17 +10,16 @@ import spotipy
 import csv
 
 
-# Spotify
+# spotify
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from database import DB_PATH
 
-# API keys (set as environment variables)
-OMDB_API_KEY = os.getenv("OMDB_API_KEY", "664d8386")
+# API keys
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID", "fc80ead3b4f0410da95885d93e837534")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET", "2535128eadda464c8890983d1ac28786")
 
-# ----------------- Spotify client ------------------------
+#spotify client
 spotify_client = None
 if SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET:
     auth_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
@@ -28,7 +27,7 @@ if SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET:
 else:
     print("Spotify credentials not set. Skipping Spotify fetch.")
 
-# ----------------- Calculations ------------------------
+# calculations
 def calculate_avg_base_exp_by_type(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
     c = conn.cursor()
     q = """
@@ -83,7 +82,7 @@ def calculate_temp_vs_wind(conn: sqlite3.Connection):
 
     results = []
     for row in c.fetchall():
-        # windSpeed_text looks like "5 mph", so extract the number
+        
         wind_raw = row["wind_speed_text"]
         try:
             wind_value = int(wind_raw.split()[0])
@@ -108,7 +107,7 @@ def example_run():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    # -------- Pokémon calculations --------
+    # ookemon calculations
     avg_be = calculate_avg_base_exp_by_type(conn)
     write_csv(
         "pokemon_base_exp_by_type.csv",
@@ -123,7 +122,7 @@ def example_run():
         weights
     )
 
-    # -------- Spotify calculations --------
+    # spotify calculations
     avg_pop = calculate_avg_popularity_per_artist(conn)
     write_csv(
         "spotify_avg_popularity.csv",
@@ -131,7 +130,7 @@ def example_run():
         avg_pop
     )
 
-    # -------- Weather calculations --------
+    # weather calculations
     temp_wind = calculate_temp_vs_wind(conn)
     write_csv(
         "temp_vs_wind.csv",

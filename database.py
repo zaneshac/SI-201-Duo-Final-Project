@@ -9,8 +9,7 @@ from typing import List
 
 DB_PATH = "newv2.db"
 
-# API keys (set as environment variables)
-OMDB_API_KEY = os.getenv("OMDB_API_KEY", "664d8386")
+# api keys
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID", "fc80ead3b4f0410da95885d93e837534")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET", "2535128eadda464c8890983d1ac28786")
 
@@ -29,7 +28,7 @@ def create_connection(db_path: str = DB_PATH) -> sqlite3.Connection:
 
 def create_tables(conn: sqlite3.Connection):
     c = conn.cursor()
-    # Pokémon tables
+    #pokemon tables
     c.execute("""
     CREATE TABLE IF NOT EXISTS pokemon (
         id INTEGER PRIMARY KEY,
@@ -61,7 +60,7 @@ def create_tables(conn: sqlite3.Connection):
     )
     """)
 
-    # Spotify tracks table
+    # spotify table
     c.execute("""
     CREATE TABLE IF NOT EXISTS tracks (
         track_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,7 +70,7 @@ def create_tables(conn: sqlite3.Connection):
     )
     """)
 
-    # Weather table
+    # weather table
     c.execute("""
     CREATE TABLE IF NOT EXISTS weather (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,7 +111,7 @@ def create_tables(conn: sqlite3.Connection):
     )
     """)
 
-    #lets try this
+    
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS weather_date (
@@ -140,18 +139,18 @@ def already_exists(conn: sqlite3.Connection, table: str, where_clause: str, para
 def get_or_create_id(conn, table, column, value):
     c = conn.cursor()
 
-    # Try to find existing row
+    # tries to find existing row
     c.execute(f"SELECT rowid FROM {table} WHERE {column} = ?", (value,))
     row = c.fetchone()
     if row:
         return row[0]
 
-    # Insert new row
+    # insert new row
     c.execute(f"INSERT INTO {table} ({column}) VALUES (?)", (value,))
     conn.commit()
     return c.lastrowid
 
-# ----------------- PokeAPI functions ------------------------
+# pokeapi functions
 POKEAPI_BASE = "https://pokeapi.co/api/v2"
 
 def fetch_pokemon_up_to_limit(conn: sqlite3.Connection, target_new: int = 25, max_id: int = 151):
@@ -200,7 +199,7 @@ def fetch_pokemon_up_to_limit(conn: sqlite3.Connection, target_new: int = 25, ma
             print("Error:", e)
     print(f"[PokeAPI] Finished run: inserted {inserted} new rows.")
 
-# ----------------- Spotify functions ------------------------
+# spotify functions
 def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str], max_new: int = 25):
     if spotify_client is None:
         print("Spotify client not initialized. Skipping track fetch.")
@@ -213,7 +212,7 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
         if inserted >= max_new:
             break
         
-        # NEW → random offset so results change every run
+        #this line makes sure that the same 25 dont keep re appearing
         offset = random.randint(0, 100)
 
         try:
@@ -241,7 +240,7 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
                         VALUES (?, ?, ?)
                     """, (title, artist_id, popularity))
 
-                    if c.rowcount:  # only count if it's truly new
+                    if c.rowcount:  # only count songs if they're actually new
                         conn.commit()
                         inserted += 1
                         print(f"[Spotify] Inserted track: {title} - {main_artist} ({inserted}/{max_new})")
@@ -256,7 +255,7 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
 
     print(f"[Spotify] Finished run: inserted {inserted} new tracks.")
 
-# ---------------- Weather.gov functions -------------------
+# weather.gov functions
 CITY_COORDS = {
     "Ann Arbor, MI": (42.2808, -83.7430),
     "Detroit, MI": (42.3314, -83.0458),
@@ -270,9 +269,9 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
     headers = {"User-Agent": "SI201-Project (student@example.edu)"}
     c = conn.cursor()
 
-    combined = []  # (city, period) tuples
+    combined = []  # (city, period) as tuples
 
-    # 1. Collect periods from all cities first
+    # collect periods from each city 
     for city in cities:
         if city not in CITY_COORDS:
             continue
@@ -303,13 +302,13 @@ def fetch_weather_for_cities(conn: sqlite3.Connection, cities: List[str], max_ne
 
         time.sleep(0.25)
 
-    # 2. Shuffle so cities mix
+    # shuffle so that cities mix up
     random.shuffle(combined)
 
-    # 3. Limit to the first 25 total rows
+    # limit results to the first 25 rows
     selected_periods = combined[:max_new]
 
-    # 4. Insert selected rows
+    #  insert the selected rows
     inserted = 0
     for city, p in selected_periods:
         date_value = p["startTime"].split("T")[0]
@@ -346,17 +345,17 @@ def main():
     conn = create_connection()
     create_tables(conn)
 
-    # Pokémon
+    # pokemon
     fetch_pokemon_up_to_limit(conn, target_new=25, max_id=151)
 
-    # Spotify tracks
+    # spotify
     artist_list = [
         "Taylor Swift", "Adele", "Drake", "Beyonce", "Ed Sheeran",
         "Billie Eilish", "The Beatles", "Kanye West", "Kendrick Lamar", "Rihanna"
     ]
     fetch_tracks_for_artist_list(conn, artist_list, max_new=25)
 
-    # Weather
+    # weather
     cities = list(CITY_COORDS.keys())
     fetch_weather_for_cities(conn, cities, max_new=25)
 

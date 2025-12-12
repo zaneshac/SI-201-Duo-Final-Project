@@ -1,10 +1,8 @@
 type_name,avg_weight
-bug,164.9
-electric,180.0
-fairy,237.5
-fire,295.6
-grass,254.16666666666666
-ground,141.0
-normal,167.55555555555554
-poison,311.9
+bug,145.83333333333334
+electric,60.0
+fire,393.3333333333333
+grass,399.6666666666667
+normal,190.42857142857142
+poison,359.5
 water,390.0

@@ -18,7 +18,7 @@ def visualize_avg_base_exp_by_type(conn: sqlite3.Connection, top_n: int = 12):
     types = [d[0] for d in data][:top_n]
     avg_be = [d[1] for d in data][:top_n]
 
-    # Generate 12 distinct colors automatically
+    # generate 12 different colors
     colors = plt.cm.tab20(range(len(types)))  # tab20 has many distinct colors
 
     plt.figure(figsize=(10, 6))
@@ -48,7 +48,7 @@ def visualize_avg_popularity_per_artist(conn: sqlite3.Connection, top_n: int = 1
     plt.tight_layout()
     plt.show()
 
-# new scatter plot visual
+# new scatterplot visualization
 def visualize_temp_vs_wind_speed(conn: sqlite3.Connection):
     from calculations import calculate_temp_vs_wind
     data = calculate_temp_vs_wind(conn)
@@ -65,7 +65,7 @@ def visualize_temp_vs_wind_speed(conn: sqlite3.Connection):
 
     plt.figure(figsize=(10, 6))
 
-    # Make scatter for each city
+    # scatterplot for each city
     for city, vals in city_groups.items():
         plt.scatter(vals["temp"], vals["wind"], label=city)
 
@@ -96,13 +96,13 @@ def visualize_pokemon_weight(conn:sqlite3.Connection):
     plt.tight_layout()
     plt.show()
 
-# ----------------- Main example run ------------------------
+# main example run
 def example_run():
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    # Visualizations
+    # visualizations
     visualize_avg_base_exp_by_type(conn)
     visualize_avg_popularity_per_artist(conn)
     visualize_temp_vs_wind_speed(conn)
