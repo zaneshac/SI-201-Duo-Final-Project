@@ -7,6 +7,8 @@ import os
 import sqlite3
 from typing import List, Tuple
 import spotipy
+import csv
+
 
 # Spotify
 import spotipy
@@ -111,24 +113,55 @@ def calculate_temp_vs_wind(conn: sqlite3.Connection):
         results.append((row["city_name"], row["temperature_high"], wind_value))
 
     return results
+def write_csv(filename: str, headers: List[str], rows: List[Tuple]):
+    """Writes rows of tuples to a CSV file with given headers."""
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(rows)
+    print(f"Wrote {filename} ({len(rows)} rows)")
 
 
 
 def example_run():
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    print(calculate_weight_per_pokemon_type(conn))
-    # Calculations
-    print("\n--- Pokémon ---")
-    print("Avg base exp by type:", calculate_avg_base_exp_by_type(conn))
-    print("\n--- Spotify ---")
-    print("Avg track popularity per artist_id:", calculate_avg_popularity_per_artist(conn))
-    print("\n--- Weather ---")
-    print("Temperature variability by city_id:", calculate_temp_variability_by_city(conn))
+    # -------- Pokémon calculations --------
+    avg_be = calculate_avg_base_exp_by_type(conn)
+    write_csv(
+        "pokemon_base_exp_by_type.csv",
+        ["type_name", "avg_base_experience", "count"],
+        avg_be
+    )
+
+    weights = calculate_weight_per_pokemon_type(conn)
+    write_csv(
+        "pokemon_weight_by_type.csv",
+        ["type_name", "avg_weight"],
+        weights
+    )
+
+    # -------- Spotify calculations --------
+    avg_pop = calculate_avg_popularity_per_artist(conn)
+    write_csv(
+        "spotify_avg_popularity.csv",
+        ["artist_name", "avg_popularity", "count"],
+        avg_pop
+    )
+
+    # -------- Weather calculations --------
+    temp_wind = calculate_temp_vs_wind(conn)
+    write_csv(
+        "temp_vs_wind.csv",
+        ["city_name", "temperature", "wind_speed_mph"],
+        temp_wind
+    )
 
     conn.close()
+    print("All CSV files written.")
+
 
 
 if __name__ == "__main__":
