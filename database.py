@@ -13,7 +13,7 @@ DB_PATH = "newv2.db"
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID", "fc80ead3b4f0410da95885d93e837534")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET", "2535128eadda464c8890983d1ac28786")
 
-# ----------------- Spotify client ------------------------
+# spotify client 
 spotify_client = None
 if SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET:
     auth_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
