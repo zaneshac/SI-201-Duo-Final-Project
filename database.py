@@ -129,13 +129,14 @@ def create_tables(conn: sqlite3.Connection):
 
     conn.commit()
 
+# checks whether a row already exists in the table
 def already_exists(conn: sqlite3.Connection, table: str, where_clause: str, params=()) -> bool:
     c = conn.cursor()
     q = f"SELECT 1 FROM {table} WHERE {where_clause} LIMIT 1"
     c.execute(q, params)
     return c.fetchone() is not None
 
-# string stuff 
+# makes sure a specific text exists: either gets row id or creates a new one
 def get_or_create_id(conn, table, column, value):
     c = conn.cursor()
 
@@ -156,13 +157,17 @@ POKEAPI_BASE = "https://pokeapi.co/api/v2"
 def fetch_pokemon_up_to_limit(conn: sqlite3.Connection, target_new: int = 25, max_id: int = 151):
     inserted = 0
     c = conn.cursor()
+
+    # loop through pokemon ids
     for pid in range(1, max_id + 1):
+        # stop when items are above or equal to 25
         if inserted >= target_new:
             break
         if already_exists(conn, "pokemon", "id = ?", (pid,)):
             continue
         url = f"{POKEAPI_BASE}/pokemon/{pid}"
         try:
+            # if pokemon isn't allowed to be pulled, skip it
             resp = requests.get(url, timeout=10)
             if resp.status_code != 200:
                 continue
@@ -171,6 +176,8 @@ def fetch_pokemon_up_to_limit(conn: sqlite3.Connection, target_new: int = 25, ma
             base_experience = data.get("base_experience")
             height = data.get("height")
             weight = data.get("weight")
+
+            # gets pokemon types
             types = data.get("types", [])
             primary_type_name = types[0]["type"]["name"] if types else None
             primary_type_id = get_or_create_id(conn, "pokemon_types", "type_name", primary_type_name)

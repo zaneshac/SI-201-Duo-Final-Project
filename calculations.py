@@ -107,7 +107,7 @@ def example_run():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    # ookemon calculations
+    # Pokemon calculations
     avg_be = calculate_avg_base_exp_by_type(conn)
     write_csv(
         "pokemon_base_exp_by_type.csv",
