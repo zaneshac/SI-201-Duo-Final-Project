@@ -42,34 +42,6 @@ def visualize_avg_popularity_per_artist(conn: sqlite3.Connection, top_n: int = 1
     plt.tight_layout()
     plt.show()
 
-#def visualize_temp_high_low_by_city(conn: sqlite3.Connection):
-    #c = conn.cursor()
-    #q = """
-    #SELECT city_id, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low
-    #FROM weather
-    #GROUP BY city_id
-    #"""
-    #c.execute(q)
-    #rows = c.fetchall()
-    #if not rows:
-        #return
-    #cities = [r["city_id"] for r in rows]
-    #highs = [r["avg_high"] for r in rows]
-    #lows = [r["avg_low"] for r in rows]
-
-    #x = range(len(cities))
-    #print(x)
-    #plt.figure(figsize=(10, 6))
-    #plt.plot(x, highs, marker="o", label="Avg High")
-    #plt.plot(x, lows, marker="o", label="Avg Low")
-    #plt.xticks(x, cities, rotation=45)
-    #plt.xlabel("Cities")
-    #plt.ylabel("Temperature")
-    #plt.title("Average High and Low Temperatures by City")
-    #plt.legend()
-    #plt.tight_layout()
-    #plt.show()
-
 # new scatter plot visual
 def visualize_temp_vs_wind_speed(conn: sqlite3.Connection):
     from calculations import calculate_temp_vs_wind

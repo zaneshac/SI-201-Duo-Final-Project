@@ -67,22 +67,23 @@ def calculate_avg_popularity_per_artist(conn: sqlite3.Connection) -> List[Tuple[
     c.execute(q)
     return [(row["artist_name"], row["avg_pop"], row["cnt"]) for row in c.fetchall()]
 
-def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
-    c = conn.cursor()
-    q = """
-    SELECT city_id, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low, COUNT(*) as cnt
-    FROM weather
-    WHERE city_id IS NOT NULL
-    GROUP BY city_id
-    """
-    c.execute(q)
-    results = []
-    for row in c.fetchall():
-        if row["avg_high"] is None or row["avg_low"] is None:
-            continue
-        variability = row["avg_high"] - row["avg_low"]
-        results.append((row["city_id"], variability, row["cnt"]))
-    return results
+
+#def calculate_temp_variability_by_city(conn: sqlite3.Connection) -> List[Tuple[str, float, int]]:
+    #c = conn.cursor()
+    #q = """
+    #SELECT city_id, AVG(temperature_high) as avg_high, AVG(temperature_low) as avg_low, COUNT(*) as cnt
+    #FROM weather
+    #WHERE city_id IS NOT NULL
+    #GROUP BY city_id
+    #"""
+    #c.execute(q)
+    #results = []
+    #for row in c.fetchall():
+       # if row["avg_high"] is None or row["avg_low"] is None:
+       #     continue
+       # variability = row["avg_high"] - row["avg_low"]
+       # results.append((row["city_id"], variability, row["cnt"]))
+    #return results
 
 
 # try this for a new visual
