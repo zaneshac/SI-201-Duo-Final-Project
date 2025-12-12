@@ -231,6 +231,7 @@ def fetch_tracks_for_artist_list(conn: sqlite3.Connection, artist_list: List[str
             )
 
             tracks = results.get("tracks", {}).get("items", [])
+            #loops through each track for each specific artist
             for track in tracks:
                 if inserted >= max_new:
                     break
